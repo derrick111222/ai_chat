@@ -8,6 +8,8 @@ import Chat from './pages/Chat';
 import Agents from './pages/Agents';
 import APIConfigs from './pages/APIConfigs';
 import Usage from './pages/Usage';
+import Templates from './pages/Templates';
+import WorkflowEditor from './pages/WorkflowEditor';
 import './App.css';
 
 // 私有路由组件
@@ -33,6 +35,8 @@ function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="chat/:conversationId" element={<Chat />} />
           <Route path="agents" element={<Agents />} />
+          <Route path="templates" element={<Templates />} />
+          <Route path="workflow-editor" element={<WorkflowEditor />} />
           <Route path="configs" element={<APIConfigs />} />
           <Route path="usage" element={<Usage />} />
         </Route>

@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   X,
+  Sparkles,
 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
@@ -25,6 +26,7 @@ const Dashboard: React.FC = () => {
   const navigation = [
     { name: '对话', href: '/chat', icon: MessageSquare },
     { name: '智能体', href: '/agents', icon: Bot },
+    { name: '模板市场', href: '/templates', icon: Sparkles },
     { name: 'API配置', href: '/configs', icon: Settings },
     { name: '使用统计', href: '/usage', icon: BarChart3 },
   ];

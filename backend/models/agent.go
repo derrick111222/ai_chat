@@ -48,6 +48,52 @@ func (t *Tools) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, t)
 }
 
+// WorkflowType Agent 工作流类型
+type WorkflowType string
+
+const (
+	WorkflowSimple   WorkflowType = "simple"   // 简单配置（当前模式）
+	WorkflowTemplate WorkflowType = "template" // 基于模板
+	WorkflowVisual   WorkflowType = "visual"   // 可视化工作流
+	WorkflowCode     WorkflowType = "code"     // 自定义代码
+)
+
+// EinoWorkflowDefinition Eino 工作流定义
+type EinoWorkflowDefinition struct {
+	Nodes []WorkflowNode `json:"nodes"`
+	Edges []WorkflowEdge `json:"edges"`
+}
+
+// WorkflowNode 工作流节点
+type WorkflowNode struct {
+	ID       string                 `json:"id"`
+	Type     string                 `json:"type"` // chatmodel, tool, lambda, retriever
+	Config   map[string]interface{} `json:"config"`
+	Position map[string]int         `json:"position,omitempty"`
+}
+
+// WorkflowEdge 工作流边
+type WorkflowEdge struct {
+	Source       string            `json:"source"`
+	Target       string            `json:"target"`
+	FieldMapping map[string]string `json:"field_mapping,omitempty"`
+}
+
+func (e EinoWorkflowDefinition) Value() (driver.Value, error) {
+	return json.Marshal(e)
+}
+
+func (e *EinoWorkflowDefinition) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return nil
+	}
+	return json.Unmarshal(bytes, e)
+}
+
 type Agent struct {
 	ID           uint           `gorm:"primarykey" json:"id"`
 	UserID       uint           `gorm:"not null;index" json:"user_id"`
@@ -61,6 +107,13 @@ type Agent struct {
 	Tools        Tools          `gorm:"type:json" json:"tools"`
 	IsPublic     bool           `gorm:"default:false;index" json:"is_public"`
 	UsageCount   int            `gorm:"default:0" json:"usage_count"`
+	
+	// Eino 工作流相关字段
+	WorkflowType       WorkflowType           `gorm:"type:varchar(20);default:'simple'" json:"workflow_type"`
+	WorkflowDefinition EinoWorkflowDefinition `gorm:"type:json" json:"workflow_definition,omitempty"`
+	TemplateID         string                 `gorm:"size:50" json:"template_id,omitempty"`
+	CustomCode         string                 `gorm:"type:text" json:"custom_code,omitempty"`
+	
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
@@ -78,6 +131,11 @@ type AgentRequest struct {
 	ModelParams  ModelParams `json:"model_params"`
 	Tools        Tools       `json:"tools"`
 	IsPublic     bool        `json:"is_public"`
+	
+	// Eino 工作流相关字段
+	WorkflowType       WorkflowType           `json:"workflow_type"`
+	WorkflowDefinition EinoWorkflowDefinition `json:"workflow_definition,omitempty"`
+	TemplateID         string                 `json:"template_id,omitempty"`
 }
 
 type AgentResponse struct {
@@ -94,23 +152,31 @@ type AgentResponse struct {
 	UsageCount   int          `json:"usage_count"`
 	CreatedAt    time.Time    `json:"created_at"`
 	APIConfig    *APIConfig   `json:"api_config,omitempty"`
+	
+	// Eino 工作流相关字段
+	WorkflowType       WorkflowType           `json:"workflow_type"`
+	WorkflowDefinition EinoWorkflowDefinition `json:"workflow_definition,omitempty"`
+	TemplateID         string                 `json:"template_id,omitempty"`
 }
 
 func (a *Agent) ToResponse() AgentResponse {
 	return AgentResponse{
-		ID:           a.ID,
-		Name:         a.Name,
-		Description:  a.Description,
-		AvatarURL:    a.AvatarURL,
-		SystemPrompt: a.SystemPrompt,
-		APIConfigID:  a.APIConfigID,
-		ModelName:    a.ModelName,
-		ModelParams:  a.ModelParams,
-		Tools:        a.Tools,
-		IsPublic:     a.IsPublic,
-		UsageCount:   a.UsageCount,
-		CreatedAt:    a.CreatedAt,
-		APIConfig:    a.APIConfig,
+		ID:                 a.ID,
+		Name:               a.Name,
+		Description:        a.Description,
+		AvatarURL:          a.AvatarURL,
+		SystemPrompt:       a.SystemPrompt,
+		APIConfigID:        a.APIConfigID,
+		ModelName:          a.ModelName,
+		ModelParams:        a.ModelParams,
+		Tools:              a.Tools,
+		IsPublic:           a.IsPublic,
+		UsageCount:         a.UsageCount,
+		CreatedAt:          a.CreatedAt,
+		APIConfig:          a.APIConfig,
+		WorkflowType:       a.WorkflowType,
+		WorkflowDefinition: a.WorkflowDefinition,
+		TemplateID:         a.TemplateID,
 	}
 }
 

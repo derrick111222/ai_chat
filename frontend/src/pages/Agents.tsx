@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Bot, Globe, Lock, Search, ChevronDown, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Bot, Globe, Lock, Search, ChevronDown, X, Workflow } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { agentService } from '../services/agentService';
 import { apiConfigService } from '../services/apiConfigService';
 import { modelService, Model } from '../services/modelService';
 import { Agent, APIConfig } from '../types';
 
 const Agents: React.FC = () => {
+  const navigate = useNavigate();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [apiConfigs, setApiConfigs] = useState<APIConfig[]>([]);
   const [models, setModels] = useState<Model[]>([]);
@@ -196,16 +198,25 @@ const Agents: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">智能体管理</h1>
             <p className="mt-2 text-gray-600">创建和管理您的AI智能体</p>
           </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={20} className="mr-2" />
-            创建智能体
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => navigate('/workflow-editor')}
+              className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Workflow size={20} className="mr-2" />
+              工作流编辑器
+            </button>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowModal(true);
+              }}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={20} className="mr-2" />
+              创建智能体
+            </button>
+          </div>
         </div>
 
         {/* 智能体列表 */}

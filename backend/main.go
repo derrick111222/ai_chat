@@ -49,6 +49,7 @@ func main() {
 	usageCtrl := &controllers.UsageController{}
 	promptTemplateCtrl := &controllers.PromptTemplateController{}
 	modelCtrl := &controllers.ModelController{}
+	templateCtrl := controllers.NewTemplateController()
 
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
@@ -67,6 +68,11 @@ func main() {
 
 		// 公开的 API（无需认证）
 		api.GET("/models", modelCtrl.GetModels) // 获取模型列表
+		
+		// Agent 模板相关（公开访问）
+		api.GET("/agent-templates", templateCtrl.ListTemplates)
+		api.GET("/agent-templates/categories", templateCtrl.GetCategories)
+		api.GET("/agent-templates/:id", templateCtrl.GetTemplate)
 
 		// 需要认证的路由
 		authorized := api.Group("")
@@ -91,6 +97,8 @@ func main() {
 			{
 				agents.GET("", agentCtrl.List)
 				agents.POST("", agentCtrl.Create)
+				agents.POST("/from-template", templateCtrl.CreateAgentFromTemplate) // 从模板创建
+				agents.POST("/from-workflow", agentCtrl.CreateFromWorkflow)         // 从工作流创建
 				agents.GET("/:id", agentCtrl.Get)
 				agents.PUT("/:id", agentCtrl.Update)
 				agents.DELETE("/:id", agentCtrl.Delete)

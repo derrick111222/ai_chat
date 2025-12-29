@@ -52,9 +52,9 @@ func (mc *MessageController) SendMessage(c *gin.Context) {
 	var messages []models.Message
 	database.DB.Where("conversation_id = ?", conversationID).Order("created_at ASC").Find(&messages)
 
-	// 调用AI服务
-	aiService := services.NewAIService()
-	response, inputTokens, outputTokens, err := aiService.Chat(conversation.Agent, messages)
+	// 调用 Eino 服务（会根据 Agent 的 WorkflowType 自动选择执行方式）
+	einoService := services.NewEinoService()
+	response, inputTokens, outputTokens, err := einoService.ExecuteAgent(c.Request.Context(), conversation.Agent, messages)
 	if err != nil {
 		utils.InternalServerError(c, "AI服务调用失败: "+err.Error())
 		return
@@ -129,6 +129,7 @@ func (mc *MessageController) StreamMessage(c *gin.Context) {
 	database.DB.Where("conversation_id = ?", conversationID).Order("created_at ASC").Find(&messages)
 
 	// 调用AI服务（流式）
+	// 注意：流式处理目前仅支持 simple 模式，未来版本会支持 Eino 工作流的流式处理
 	aiService := services.NewAIService()
 	stream, err := aiService.ChatStream(conversation.Agent, messages)
 	if err != nil {

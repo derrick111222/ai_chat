@@ -60,6 +60,11 @@ CREATE TABLE IF NOT EXISTS agents (
     tools JSON,
     is_public BOOLEAN DEFAULT FALSE,
     usage_count INT DEFAULT 0,
+    -- Eino 工作流相关字段
+    workflow_type VARCHAR(20) DEFAULT 'simple',
+    workflow_definition JSON,
+    template_id VARCHAR(50),
+    custom_code TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
@@ -68,6 +73,8 @@ CREATE TABLE IF NOT EXISTS agents (
     INDEX idx_user_id (user_id),
     INDEX idx_is_public (is_public),
     INDEX idx_deleted_at (deleted_at),
+    INDEX idx_workflow_type (workflow_type),
+    INDEX idx_template_id (template_id),
     FULLTEXT idx_search (name, description)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
